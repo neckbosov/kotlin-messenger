@@ -1,26 +1,23 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-        maven(url = "https://kotlin.bintray.com/ktor")
-    }
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.50")
-    }
-}
+val vKtor: String by project
+val vExposed: String by project
+val vKoin: String by project
+val vPostgres: String by project
+val vKotlinx: String by project
+val vTestcontainers: String by project
+val vKotlintest: String by project
 
 plugins {
     id("com.bmuschko.docker-remote-api") version "6.0.0"
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm")
     application
     java
 }
 
-group = "ru.compscicenter.bsse.18b09.bezbykova"
-version = "1.0-SNAPSHOT"
+group = "com.neckbosov"
+version = "0.0.1"
 
 application {
     mainClassName = "io.ktor.server.netty.EngineMain"
@@ -31,61 +28,57 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val koin_version = "2.0.1"
 
 repositories {
     mavenLocal()
+    mavenCentral()
     jcenter()
     maven(url = "https://kotlin.bintray.com/ktor")
 }
 
-val ktor_version = "1.2.4"
 val junitJupiterVersion = "5.5.2"
 
 dependencies {
     // Kotlin
-    compile(kotlin("stdlib"))
     implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$vKotlinx")
 
-    // Junit
-    testCompile("junit:junit:4.12")
-    testCompile("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
-    testImplementation("org.testcontainers:junit-jupiter:1.12.3")
+    // Test
+    testImplementation("io.kotlintest:kotlintest-runner-junit5:$vKotlintest")
+    testImplementation("org.testcontainers:junit-jupiter:$vTestcontainers")
 
     // Koin
-    compile("org.koin:koin-ktor:$koin_version")
-    compile("org.koin:koin-logger-slf4j:$koin_version")
-    testCompile("org.koin:koin-test:$koin_version")
-    implementation("org.koin:koin-core:$koin_version")
-    testImplementation("org.koin:koin-test:$koin_version")
+    implementation("org.koin:koin-ktor:$vKoin")
+    implementation("org.koin:koin-logger-slf4j:$vKoin")
+    implementation("org.koin:koin-core:$vKoin")
+    testImplementation("org.koin:koin-test:$vKoin")
+    testImplementation("io.kotlintest:kotlintest-extensions-koin:$vKotlintest")
 
     // Ktor
-    compile("io.ktor:ktor-server-netty:$ktor_version")
-    compile("io.ktor:ktor-server-core:$ktor_version")
-    compile("io.ktor:ktor-auth:$ktor_version")
-    compile("io.ktor:ktor-auth-jwt:$ktor_version")
-    compile("io.ktor:ktor-jackson:$ktor_version")
-    implementation("io.ktor:ktor-client-apache:$ktor_version")
-    implementation("io.ktor:ktor-client-json-jvm:$ktor_version")
-    implementation("io.ktor:ktor-client-jackson:$ktor_version")
-//    compile('org.slf4j:slf4j-nop:1.7.25'
-    testCompile("io.ktor:ktor-server-tests:$ktor_version")
-    testCompile("io.ktor:ktor-server-test-host:$ktor_version")
+    implementation("io.ktor:ktor-server-netty:$vKtor")
+    implementation("io.ktor:ktor-server-core:$vKtor")
+    implementation("io.ktor:ktor-auth:$vKtor")
+    implementation("io.ktor:ktor-auth-jwt:$vKtor")
+    implementation("io.ktor:ktor-jackson:$vKtor")
+    implementation("io.ktor:ktor-client-apache:$vKtor")
+    implementation("io.ktor:ktor-client-json-jvm:$vKtor")
+    implementation("io.ktor:ktor-client-jackson:$vKtor")
+    implementation("io.ktor:ktor-websockets:$vKtor")
+    testImplementation("io.ktor:ktor-server-tests:$vKtor")
+    testImplementation("io.ktor:ktor-server-test-host:$vKtor")
 
     // Exposed
-    compile("org.jetbrains.exposed:exposed-core:0.18.1")
-    compile("org.jetbrains.exposed:exposed-dao:0.18.1")
-    compile("org.jetbrains.exposed:exposed-jdbc:0.18.1")
-    compile("org.jetbrains.exposed:exposed-jodatime:0.18.1")
+    implementation("org.jetbrains.exposed:exposed-core:$vExposed")
+    implementation("org.jetbrains.exposed:exposed-dao:$vExposed")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$vExposed")
+    implementation("org.jetbrains.exposed:exposed-jodatime:$vExposed")
 
     // Database
-    compile("org.postgresql:postgresql:42.2.2")
-    testCompile("org.testcontainers:postgresql:1.12.3")
+    implementation("org.postgresql:postgresql:$vPostgres")
+    testImplementation("org.testcontainers:postgresql:$vTestcontainers")
 }
 
-tasks.test {
+tasks.withType<Test> {
     useJUnitPlatform()
 }
 
