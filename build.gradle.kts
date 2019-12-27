@@ -28,15 +28,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-
 repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
     maven(url = "https://kotlin.bintray.com/ktor")
 }
-
-val junitJupiterVersion = "5.5.2"
 
 dependencies {
     // Kotlin
