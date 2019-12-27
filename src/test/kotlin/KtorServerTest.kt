@@ -1,17 +1,15 @@
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotlintest.matchers.string.shouldNotBeEmpty
+import io.kotlintest.matchers.types.shouldNotBeNull
+import io.kotlintest.shouldBe
 import io.ktor.application.Application
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.HttpStatusCodeContent
 import io.ktor.server.testing.*
-import junit.framework.Assert.*
-import org.junit.jupiter.api.Test
 import org.koin.test.inject
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 import java.util.*
-import org.joda.time.DateTime
 
 class KtorServerTest : DBTest() {
     private fun withAppAndServer(test: TestApplicationEngine.(Server) -> Unit) {
@@ -69,7 +67,7 @@ class KtorServerTest : DBTest() {
         withAppAndServer { server ->
             server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
             withLoginRequest("shananton", "qwerty123") {
-                assertEquals(HttpStatusCode.OK, response.status())
+                response.status() shouldBe HttpStatusCode.OK
             }
         }
     }
@@ -80,8 +78,8 @@ class KtorServerTest : DBTest() {
         withAppAndServer { server ->
             server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
             withLoginRequest("shananton", "eye4goat") {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
-                assertEquals("Invalid username/password pair", response.content)
+                response.status() shouldBe HttpStatusCode.Unauthorized
+                response.content shouldBe "Invalid username/password pair"
             }
         }
     }
@@ -90,7 +88,7 @@ class KtorServerTest : DBTest() {
     fun testRegisterOK() {
         withAppAndServer {
             withRegisterRequest("Antoha", "shananton@kek.lol", "+7938529835", "shananton", "qwerty123") {
-                assertEquals(HttpStatusCode.OK, response.status())
+                response.status() shouldBe HttpStatusCode.OK
             }
         }
     }
@@ -100,8 +98,8 @@ class KtorServerTest : DBTest() {
     fun testRegisterBadEmail() {
         withAppAndServer {
             withRegisterRequest("Antoha", "shananton@@kek.lol", "+7938529835", "shananton", "qwerty123") {
-                assertEquals(HttpStatusCode.BadRequest, response.status())
-                assertEquals("Email must contain exactly one '@'", response.content)
+                response.status() shouldBe HttpStatusCode.BadRequest
+                response.content shouldBe "Email must contain exactly one '@'"
             }
         }
     }
@@ -112,12 +110,14 @@ class KtorServerTest : DBTest() {
             server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
             var token: String = ""
             withLoginRequest("shananton", "qwerty123") {
-                assertEquals(HttpStatusCode.OK, response.status())
-                assertFalse(response.content.isNullOrEmpty())
-                token = response.content!!
+                response.status() shouldBe HttpStatusCode.OK
+                val content = response.content
+                content.shouldNotBeNull()
+                content.shouldNotBeEmpty()
+                token = content
             }
             withJsonJwtRequest("/getChats", "", token) {
-                assertEquals(HttpStatusCode.OK, response.status())
+                response.status() shouldBe HttpStatusCode.OK
             }
         }
     }
@@ -128,12 +128,14 @@ class KtorServerTest : DBTest() {
             server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
             var token: String = ""
             withLoginRequest("shananton", "qwerty123") {
-                assertEquals(HttpStatusCode.OK, response.status())
-                assertFalse(response.content.isNullOrEmpty())
-                token = response.content!!
+                response.status() shouldBe HttpStatusCode.OK
+                val content = response.content
+                content.shouldNotBeNull()
+                content.shouldNotBeEmpty()
+                token = content
             }
             withJsonJwtRequest("/getChats", "", token + "1") {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+                response.status() shouldBe HttpStatusCode.Unauthorized
             }
         }
     }
@@ -143,7 +145,7 @@ class KtorServerTest : DBTest() {
         withAppAndServer { server ->
             val user = server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
             withJsonJwtRequest("/getChats", "", JwtConfig.makeToken(user)) {
-                assertEquals(HttpStatusCode.OK, response.status())
+                response.status() shouldBe HttpStatusCode.OK
             }
         }
     }
@@ -153,7 +155,7 @@ class KtorServerTest : DBTest() {
         withAppAndServer { server ->
             val user = server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
             withJsonJwtRequest("/getChats", "", JwtConfig.makeToken(user, Date(System.currentTimeMillis() - 1000))) {
-                assertEquals(HttpStatusCode.Unauthorized, response.status())
+                response.status() shouldBe HttpStatusCode.Unauthorized
             }
         }
     }
@@ -167,36 +169,40 @@ class KtorServerTest : DBTest() {
             val msg1 = server.sendMessage(user1.id, true, chat.id, "I'm tired of living")!!
             val msg2 = server.sendMessage(user2.id, true, chat.id, "Hi tired of living, I'm dad")!!
             val mapper = jacksonObjectMapper()
-            withJsonJwtRequest("/getChatMessages", mapper.writeValueAsString(
-                GetChatMessagesRequest(chat.id, true)
-            ), JwtConfig.makeToken(user1)) {
-                assertEquals(HttpStatusCode.OK, response.status())
-                assertNotNull(response.content)
+            withJsonJwtRequest(
+                "/getChatMessages", mapper.writeValueAsString(
+                    GetChatMessagesRequest(chat.id, true)
+                ), JwtConfig.makeToken(user1)
+            ) {
+                response.status() shouldBe HttpStatusCode.OK
+                response.content.shouldNotBeNull()
                 val resp = mapper.readValue<GetChatMessagesResponse>(response.content!!)
-                assertEquals(listOf(msg1, msg2), resp.messages)
+                resp.messages shouldBe listOf(msg1, msg2)
             }
         }
     }
 
 
-@Test
-fun testGetChatMessagesForbidden() {
-    withAppAndServer { server ->
-        val user1 = server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
-        val user2 = server.register("Nekit", "bb@aa", "+123456789", "bosow", "password")
-        val user3 = server.register("Eve", "eve@eden", "+228228", "EEE.service", "nandesuka")
-        val chat = server.createPersonalChat(user1.id, user2.id)!!
-        val msg1 = server.sendMessage(user1.id, true, chat.id, "I'm tired of living")!!
-        val msg2 = server.sendMessage(user2.id, true, chat.id, "Hi tired of living, I'm dad")!!
-        val mapper = jacksonObjectMapper()
-        withJsonJwtRequest("/getChatMessages", mapper.writeValueAsString(
-            GetChatMessagesRequest(chat.id, true)
-        ), JwtConfig.makeToken(user3)) {
-            assertEquals(HttpStatusCode.Forbidden, response.status())
-            assertEquals("You are not a member of this chat", response.content)
+    @Test
+    fun testGetChatMessagesForbidden() {
+        withAppAndServer { server ->
+            val user1 = server.register("Antoha", "shananton@kek.lol", "+7654382145", "shananton", "qwerty123")
+            val user2 = server.register("Nekit", "bb@aa", "+123456789", "bosow", "password")
+            val user3 = server.register("Eve", "eve@eden", "+228228", "EEE.service", "nandesuka")
+            val chat = server.createPersonalChat(user1.id, user2.id)!!
+            val msg1 = server.sendMessage(user1.id, true, chat.id, "I'm tired of living")!!
+            val msg2 = server.sendMessage(user2.id, true, chat.id, "Hi tired of living, I'm dad")!!
+            val mapper = jacksonObjectMapper()
+            withJsonJwtRequest(
+                "/getChatMessages", mapper.writeValueAsString(
+                    GetChatMessagesRequest(chat.id, true)
+                ), JwtConfig.makeToken(user3)
+            ) {
+                response.status() shouldBe HttpStatusCode.Forbidden
+                response.content shouldBe "You are not a member of this chat"
+            }
         }
     }
-}
 
 //    @Test
 //    fun testLogOut() {

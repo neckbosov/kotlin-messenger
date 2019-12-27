@@ -1,7 +1,10 @@
 import dao.GroupChatDao
 import dao.UserDao
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import io.kotlintest.inspectors.forOne
+import io.kotlintest.matchers.collections.shouldBeEmpty
+import io.kotlintest.matchers.types.shouldBeNull
+import io.kotlintest.matchers.types.shouldNotBeNull
+import io.kotlintest.shouldBe
 import org.koin.test.inject
 
 class GroupChatDBTest : DBTestWithKoin() {
@@ -19,11 +22,10 @@ class GroupChatDBTest : DBTestWithKoin() {
         ).id.value
 
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "knskcsa")?.id?.value
-        val chat2 = chats.addNewGroupChat(239,"null", null)?.id?.value
+        val chat2 = chats.addNewGroupChat(239, "null", null)?.id?.value
 
-        Assertions.assertNotNull(chat1)
-
-        Assertions.assertNull(chat2)
+        chat1.shouldNotBeNull()
+        chat2.shouldBeNull()
     }
 
     @Test
@@ -40,15 +42,11 @@ class GroupChatDBTest : DBTestWithKoin() {
         ).id.value
 
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "ajhbjakl")?.id?.value
-
-        Assertions.assertNotNull( chat1)
-        if (chat1 != null) {
-            Assertions.assertEquals(chat1, chats.getById(chat1)?.id?.value)
-            Assertions.assertEquals(alya, chats.getById(chat1)?.owner?.value)
-            Assertions.assertEquals("Alin chat", chats.getById(chat1)?.chatName)
-        }
-
-        Assertions.assertNull(chats.getById(239))
+        chat1.shouldNotBeNull()
+        chats.getById(chat1)?.id?.value shouldBe chat1
+        chats.getById(chat1)?.owner?.value shouldBe alya
+        chats.getById(chat1)?.chatName shouldBe "Alin chat"
+        chats.getById(239).shouldBeNull()
     }
 
     @Test
@@ -65,15 +63,14 @@ class GroupChatDBTest : DBTestWithKoin() {
         ).id.value
 
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "jaknaasx")?.id?.value
+        chat1.shouldNotBeNull()
 
-        Assertions.assertNotNull(chat1)
-        if (chat1 != null) {
-            Assertions.assertEquals(chat1, chats.getById(chat1)?.id?.value)
+        chats.getById(chat1)?.id?.value shouldBe chat1
 
-            chats.deleteById(chat1)
+        chats.deleteById(chat1)
 
-            Assertions.assertNull(chats.getById(chat1))
-        }
+        chats.getById(chat1).shouldBeNull()
+
     }
 
     @Test
@@ -100,18 +97,18 @@ class GroupChatDBTest : DBTestWithKoin() {
         val chat1 = chats.addNewGroupChat(vanya, "Vanin chat", "oqlmcznka")?.id?.value
         val chat2 = chats.addNewGroupChat(antoha, "Antohin chat", "nvmbvhajekf")?.id?.value
 
-        Assertions.assertNotNull(chat1)
-        Assertions.assertNotNull(chat2)
+        chat1.shouldNotBeNull()
+        chat2.shouldNotBeNull()
 
-        Assertions.assertEquals(2, chats.size)
-        if (chat1 != null)
-            chats.deleteById(chat1)
+        chats.size shouldBe 2
 
-        Assertions.assertEquals(1, chats.size)
-        if (chat2 != null)
-            chats.deleteById(chat2)
+        chats.deleteById(chat1)
 
-        Assertions.assertEquals(0, chats.size)
+        chats.size shouldBe 1
+
+        chats.deleteById(chat2)
+
+        chats.size shouldBe 0
     }
 
     @Test
@@ -139,14 +136,18 @@ class GroupChatDBTest : DBTestWithKoin() {
         val chat2 = chats.addNewGroupChat(alya, "Alin chat", "2")?.id?.value
         val chat3 = chats.addNewGroupChat(vanya, "Vanin chat", "3")?.id?.value
 
-        Assertions.assertEquals(2, chats.searchByName("Alin chat").size)
-        Assertions.assertTrue(chats.searchByName("Alin chat").any{it.uniqueLink == "1"})
-        Assertions.assertTrue(chats.searchByName("Alin chat").any{it.uniqueLink == "2"})
-
-        Assertions.assertEquals(1, chats.searchByName("Vanin chat").size)
-        Assertions.assertTrue(chats.searchByName("Vanin chat").any{it.uniqueLink == "3"})
-
-        Assertions.assertEquals(0, chats.searchByName("Nety(((").size)
+        chats.searchByName("Alin chat").size shouldBe 2
+        chats.searchByName("Alin chat").forOne {
+            it.uniqueLink shouldBe "1"
+        }
+        chats.searchByName("Alin chat").forOne {
+            it.uniqueLink shouldBe "2"
+        }
+        chats.searchByName("Vanin chat").size shouldBe 1
+        chats.searchByName("Vanin chat").forOne {
+            it.uniqueLink shouldBe "3"
+        }
+        chats.searchByName("Nety(((").shouldBeEmpty()
     }
 
     @Test
@@ -174,9 +175,9 @@ class GroupChatDBTest : DBTestWithKoin() {
         val chat2 = chats.addNewGroupChat(alya, "Alin chat", "2")?.id?.value
         val chat3 = chats.addNewGroupChat(vanya, "Vanin chat", "3")?.id?.value
 
-        Assertions.assertEquals(chat1, chats.getChatByInviteLink("1")?.id?.value)
-        Assertions.assertEquals(chat2, chats.getChatByInviteLink("2")?.id?.value)
-        Assertions.assertEquals(chat3, chats.getChatByInviteLink("3")?.id?.value)
-        Assertions.assertNull(chats.getChatByInviteLink("4")?.id?.value)
+        chats.getChatByInviteLink("1")?.id?.value shouldBe chat1
+        chats.getChatByInviteLink("2")?.id?.value shouldBe chat2
+        chats.getChatByInviteLink("3")?.id?.value shouldBe chat3
+        chats.getChatByInviteLink("4").shouldBeNull()
     }
 }

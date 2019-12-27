@@ -1,8 +1,10 @@
 import dao.GroupChatDao
 import dao.MembersOfGroupChatDao
 import dao.UserDao
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import io.kotlintest.matchers.boolean.shouldBeFalse
+import io.kotlintest.matchers.boolean.shouldBeTrue
+import io.kotlintest.matchers.types.shouldNotBeNull
+import io.kotlintest.shouldBe
 import org.koin.test.inject
 
 class MembersOfGroupChatDBTest : DBTestWithKoin() {
@@ -13,7 +15,7 @@ class MembersOfGroupChatDBTest : DBTestWithKoin() {
         val users: UserDao by inject()
 
         val alya = users.addNewUser(
-            "Alya",
+             "Alya",
             "Alya@gmail.com",
             "1234567",
             "Pingwin",
@@ -38,20 +40,15 @@ class MembersOfGroupChatDBTest : DBTestWithKoin() {
 
 
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "knskcsa")?.id?.value
+        chat1.shouldNotBeNull()
+
         val chat2 = chats.addNewGroupChat(vanya, "Vanin chat", "oqlmcznka")?.id?.value
+        chat2.shouldNotBeNull()
 
-        Assertions.assertNotNull(chat1)
-        Assertions.assertNotNull(chat2)
-
-        if (chat1 != null) {
-            Assertions.assertTrue(base.add(chat1, vanya))
-            Assertions.assertTrue(base.add(chat1, antoha))
-        }
-
-        if (chat2 != null)
-            Assertions.assertTrue(base.add(chat2, alya))
-
-        Assertions.assertFalse(base.add(239, alya))
+        base.add(chat1, vanya).shouldBeTrue()
+        base.add(chat1, antoha).shouldBeTrue()
+        base.add(chat2, alya).shouldBeTrue()
+        base.add(239, alya).shouldBeFalse()
 
     }
 
@@ -87,20 +84,15 @@ class MembersOfGroupChatDBTest : DBTestWithKoin() {
 
 
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "knskcsa")?.id?.value
+        chat1.shouldNotBeNull()
 
-        Assertions.assertNotNull(chat1)
 
-        if (chat1 != null) {
-            Assertions.assertTrue(base.add(chat1, vanya))
-            Assertions.assertTrue(base.add(chat1, antoha))
-
-            Assertions.assertTrue(base.remove(chat1, vanya))
-            Assertions.assertFalse(base.remove(chat1, vanya))
-
-            Assertions.assertFalse(base.remove(chat1, alya))
-        }
-
-        Assertions.assertFalse(base.remove(239, alya))
+        base.add(chat1, vanya).shouldBeTrue()
+        base.add(chat1, antoha).shouldBeTrue()
+        base.remove(chat1, vanya).shouldBeTrue()
+        base.remove(chat1, vanya).shouldBeFalse()
+        base.remove(chat1, alya).shouldBeFalse()
+        base.remove(239, alya).shouldBeFalse()
     }
 
     @Test
@@ -135,26 +127,21 @@ class MembersOfGroupChatDBTest : DBTestWithKoin() {
 
 
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "knskcsa")?.id?.value
+        chat1.shouldNotBeNull()
+
         val chat2 = chats.addNewGroupChat(vanya, "Vanin chat", "oqlmcznka")?.id?.value
+        chat2.shouldNotBeNull()
 
-        Assertions.assertNotNull(chat1)
-        Assertions.assertNotNull(chat2)
+        base.add(chat1, vanya).shouldBeTrue()
+        base.add(chat1, antoha).shouldBeTrue()
+        base.add(chat2, alya).shouldBeTrue()
 
-        if (chat1 != null)
-            Assertions.assertTrue(base.add(chat1, vanya))
-        if (chat1 != null)
-            Assertions.assertTrue(base.add(chat1, antoha))
-        if (chat2 != null)
-            Assertions.assertTrue(base.add(chat2, alya))
+        base.select(chat1).size shouldBe 3
+        base.select(chat2).size shouldBe 2
 
-        if (chat1 != null && chat2 != null) {
-            Assertions.assertEquals(3, base.select(chat1).size)
-            Assertions.assertEquals(2, base.select(chat2).size)
+        base.remove(chat1, antoha).shouldBeTrue()
 
-            Assertions.assertTrue(base.remove(chat1, antoha))
-
-            Assertions.assertEquals(2, base.select(chat1).size)
-        }
+        base.select(chat1).size shouldBe 2
 
     }
 
@@ -188,34 +175,27 @@ class MembersOfGroupChatDBTest : DBTestWithKoin() {
             "4444"
         ).id.value
 
-
         val chat1 = chats.addNewGroupChat(alya, "Alin chat", "knskcsa")?.id?.value
+        chat1.shouldNotBeNull()
+
         val chat2 = chats.addNewGroupChat(vanya, "Vanin chat", "oqlmcznka")?.id?.value
+        chat2.shouldNotBeNull()
 
-        Assertions.assertNotNull(chat1)
-        Assertions.assertNotNull(chat2)
+        base.add(chat1, vanya).shouldBeTrue()
+        base.add(chat1, antoha).shouldBeTrue()
 
-        if (chat1 != null) {
-            Assertions.assertTrue(base.add(chat1, vanya))
-            Assertions.assertTrue(base.add(chat1, antoha))
+        base.contains(chat1, alya).shouldBeTrue()
+        base.contains(chat1, vanya).shouldBeTrue()
+        base.contains(chat1, antoha).shouldBeTrue()
 
-            Assertions.assertTrue(base.contains(chat1, alya))
-            Assertions.assertTrue(base.contains(chat1, vanya))
-            Assertions.assertTrue(base.contains(chat1, antoha))
+        base.remove(chat1, vanya).shouldBeTrue()
+        base.contains(chat1, vanya).shouldBeFalse()
 
-            Assertions.assertTrue(base.remove(chat1, vanya))
-            Assertions.assertFalse(base.contains(chat1, vanya))
+        base.add(chat2, alya).shouldBeTrue()
 
-        }
-
-        if (chat2 != null) {
-            Assertions.assertTrue(base.add(chat2, alya))
-
-            Assertions.assertTrue(base.contains(chat2, alya))
-            Assertions.assertTrue(base.contains(chat2, vanya))
-
-            Assertions.assertFalse(base.contains(chat2, antoha))
-        }
+        base.contains(chat2, alya).shouldBeTrue()
+        base.contains(chat2, vanya).shouldBeTrue()
+        base.contains(chat2, antoha).shouldBeFalse()
 
     }
 }

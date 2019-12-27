@@ -1,41 +1,34 @@
+import io.kotlintest.specs.AnnotationSpec
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
 import org.koin.test.KoinTest
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import tables.*
 
-internal class SpecifiedPostgreSQLContainer(val image: String) :
+internal class SpecifiedPostgreSQLContainer(image: String) :
     PostgreSQLContainer<SpecifiedPostgreSQLContainer>(image)
 
 @Testcontainers
-open class DBTest : KoinTest {
+abstract class DBTest : KoinTest, AnnotationSpec() {
 
-    companion object {
-        @Container
-        @JvmField
-        internal val postgres = PostgreSQLContainer<SpecifiedPostgreSQLContainer>()
+    @Container
+    @JvmField
+    internal val postgres = PostgreSQLContainer<SpecifiedPostgreSQLContainer>()
 
-        @BeforeAll
-        @JvmStatic
-        internal fun initContainer() {
-            postgres.start()
-            Database.connect(
-                postgres.jdbcUrl, driver = "org.postgresql.Driver",
-                user = postgres.username, password = postgres.password
-            )
-        }
-
-        @AfterAll
-        @JvmStatic
-        internal fun closePostgres() = postgres.close()
+    @BeforeAll
+    internal fun initContainer() {
+        postgres.start()
+        Database.connect(
+            postgres.jdbcUrl, driver = "org.postgresql.Driver",
+            user = postgres.username, password = postgres.password
+        )
     }
 
+    @AfterAll
+    internal fun closePostgres() = postgres.close()
 
     @BeforeEach
     fun start() {

@@ -1,7 +1,8 @@
 import dao.BlockedUsersDao
 import dao.UserDao
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import io.kotlintest.matchers.boolean.shouldBeFalse
+import io.kotlintest.matchers.boolean.shouldBeTrue
+import io.kotlintest.shouldBe
 import org.koin.test.inject
 
 class BlockedUsersDBTest : DBTestWithKoin() {
@@ -39,14 +40,14 @@ class BlockedUsersDBTest : DBTestWithKoin() {
         base.block(alya, antoha)
         base.block(antoha, alya)
 
-        Assertions.assertTrue(base.isBlocked(alya, antoha))
-        Assertions.assertTrue(base.isBlocked(antoha, alya))
-        Assertions.assertTrue(base.isBlocked(alya, nikita))
-        Assertions.assertTrue(base.isBlocked(nikita, alya))
+        base.isBlocked(alya, antoha).shouldBeTrue()
+        base.isBlocked(antoha, alya).shouldBeTrue()
+        base.isBlocked(alya, nikita).shouldBeTrue()
+        base.isBlocked(nikita, alya).shouldBeTrue()
 
         base.unblock(alya, antoha)
-        Assertions.assertFalse(base.isBlocked(alya, antoha))
-        Assertions.assertTrue(base.isBlocked(antoha, alya))
+        base.isBlocked(alya, antoha).shouldBeFalse()
+        base.isBlocked(antoha, alya).shouldBeTrue()
 
         base.unblock(alya, nikita)
         base.unblock(alya, nikita)
@@ -54,8 +55,8 @@ class BlockedUsersDBTest : DBTestWithKoin() {
 
         base.block(nikita, antoha)
 
-        Assertions.assertEquals(0, base.select(alya).size)
-        Assertions.assertEquals(1, base.select(antoha).size)
-        Assertions.assertEquals(2, base.select(nikita).size)
+        base.select(alya).size shouldBe 0
+        base.select(antoha).size shouldBe 1
+        base.select(nikita).size shouldBe 2
     }
 }

@@ -1,7 +1,8 @@
 import dao.PersonalChatDao
 import dao.UserDao
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import io.kotlintest.matchers.types.shouldBeNull
+import io.kotlintest.matchers.types.shouldNotBeNull
+import io.kotlintest.shouldBe
 import org.koin.test.inject
 
 class PersonalChatTests : DBTestWithKoin() {
@@ -30,10 +31,9 @@ class PersonalChatTests : DBTestWithKoin() {
         val chat2 = chats.addNewPersonalChat(239, 30)?.id?.value
         val chat3 = chats.addNewPersonalChat(alya, 239)?.id?.value
 
-        Assertions.assertNotNull(chat1)
-
-        Assertions.assertNull(chat2)
-        Assertions.assertNull(chat3)
+        chat1.shouldNotBeNull()
+        chat2.shouldBeNull()
+        chat3.shouldBeNull()
     }
 
     @Test
@@ -58,15 +58,11 @@ class PersonalChatTests : DBTestWithKoin() {
         ).id.value
 
         val chat1 = chats.addNewPersonalChat(alya, vanya)?.id?.value
-
-        Assertions.assertNotNull( chat1)
-        if (chat1 != null) {
-            Assertions.assertEquals(chat1, chats.getById(chat1)?.id?.value)
-            Assertions.assertEquals(alya, chats.getById(chat1)?.member1?.value)
-            Assertions.assertEquals(vanya, chats.getById(chat1)?.member2?.value)
-        }
-
-        Assertions.assertNull(chats.getById(239))
+        chat1.shouldNotBeNull()
+        chats.getById(chat1)?.id?.value shouldBe chat1
+        chats.getById(chat1)?.member1?.value shouldBe alya
+        chats.getById(chat1)?.member2?.value shouldBe vanya
+        chats.getById(239).shouldBeNull()
     }
 
     @Test
@@ -92,15 +88,12 @@ class PersonalChatTests : DBTestWithKoin() {
 
         val chat1 = chats.addNewPersonalChat(alya, vanya)?.id?.value
 
-        Assertions.assertNotNull(chat1)
-        if (chat1 != null) {
-            Assertions.assertEquals(chat1, chats.getById(chat1)?.id?.value)
+        chat1.shouldNotBeNull()
+        chats.getById(chat1)?.id?.value shouldBe chat1
 
-            chats.deleteById(chat1)
+        chats.deleteById(chat1)
 
-            Assertions.assertNull(chats.getById(chat1)?.id)
-        }
-
+        chats.getById(chat1)?.id.shouldBeNull()
     }
 
     @Test
@@ -136,22 +129,21 @@ class PersonalChatTests : DBTestWithKoin() {
         val chat2 = chats.addNewPersonalChat(nikita, antoha)?.id?.value
         val chat3 = chats.addNewPersonalChat(antoha, vanya)?.id?.value
 
-        Assertions.assertNotNull(chat1)
-        Assertions.assertNotNull(chat2)
-        Assertions.assertNotNull(chat3)
+        chat1.shouldNotBeNull()
+        chat2.shouldNotBeNull()
+        chat3.shouldNotBeNull()
+        chats.size shouldBe 3
 
-        Assertions.assertEquals(3, chats.size)
-        if (chat1 != null)
-            chats.deleteById(chat1)
+        chats.deleteById(chat1)
 
-        Assertions.assertEquals(2, chats.size)
-        if (chat2 != null)
-            chats.deleteById(chat2)
+        chats.size shouldBe 2
 
-        Assertions.assertEquals(1, chats.size)
-        if (chat3 != null)
-            chats.deleteById(chat3)
+        chats.deleteById(chat2)
 
-        Assertions.assertEquals(0, chats.size)
+        chats.size shouldBe 1
+
+        chats.deleteById(chat3)
+
+        chats.size shouldBe 0
     }
 }

@@ -2,9 +2,11 @@ import dao.GroupChatDao
 import dao.MessageDao
 import dao.PersonalChatDao
 import dao.UserDao
-import entries.MessageDBEntry
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import io.kotlintest.matchers.boolean.shouldBeFalse
+import io.kotlintest.matchers.boolean.shouldBeTrue
+import io.kotlintest.matchers.types.shouldBeNull
+import io.kotlintest.matchers.types.shouldNotBeNull
+import io.kotlintest.shouldBe
 import org.koin.test.inject
 
 class MessageDBTest : DBTestWithKoin() {
@@ -32,28 +34,24 @@ class MessageDBTest : DBTestWithKoin() {
         ).id.value
 
         val chat1 = pchats.addNewPersonalChat(alya, vanya)
+        chat1.shouldNotBeNull()
+
         val chat2 = gchats.addNewGroupChat(alya, "Alin chat", "1")
+        chat2.shouldNotBeNull()
 
-        var msg1: MessageDBEntry? = null
-        if (chat1?.id?.value != null)
-            msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
-        var msg2: MessageDBEntry? = null
-        if (chat2?.id?.value != null)
-            msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
+        val msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
+        msg1.shouldNotBeNull()
 
-        Assertions.assertNotNull(msg1?.id?.value)
-        if (msg1?.id?.value != null && chat1?.id?.value != null) {
-            Assertions.assertEquals(msg1.id.value, base.getById(msg1.id.value)?.id?.value)
-            Assertions.assertEquals(chat1.id.value, msg1.chat)
-            Assertions.assertTrue(msg1.isPersonal)
-        }
+        val msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
+        msg2.shouldNotBeNull()
 
-        Assertions.assertNotNull(msg2?.id?.value)
-        if (msg2?.id?.value != null && chat2?.id?.value != null) {
-            Assertions.assertEquals(msg2.id.value, base.getById(msg2.id.value)?.id?.value)
-            Assertions.assertEquals(chat2.id.value, msg2.chat)
-            Assertions.assertFalse(msg2.isPersonal)
-        }
+        base.getById(msg1.id.value)?.id?.value shouldBe msg1.id.value
+        msg1.chat shouldBe chat1.id.value
+        msg1.isPersonal.shouldBeTrue()
+
+        base.getById(msg2.id.value)?.id?.value shouldBe msg2.id.value
+        msg2.chat shouldBe chat2.id.value
+        msg2.isPersonal.shouldBeFalse()
     }
 
     @Test
@@ -80,32 +78,28 @@ class MessageDBTest : DBTestWithKoin() {
         ).id.value
 
         val chat1 = pchats.addNewPersonalChat(alya, vanya)
+        chat1.shouldNotBeNull()
+
         val chat2 = gchats.addNewGroupChat(alya, "Alin chat", "1")
+        chat2.shouldNotBeNull()
 
-        var msg1: MessageDBEntry? = null
-        if (chat1?.id?.value != null)
-            msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
-        var msg2: MessageDBEntry? = null
-        if (chat2?.id?.value != null)
-            msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
+        val msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
+        msg1.shouldNotBeNull()
 
-        Assertions.assertNotNull(msg1?.id?.value)
-        if (msg1?.id?.value != null && chat1?.id?.value != null) {
-            Assertions.assertEquals(msg1.id.value, base.getById(msg1.id.value)?.id?.value)
+        val msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
+        msg2.shouldNotBeNull()
 
-            base.deleteById(msg1.id.value)
+        base.getById(msg1.id.value)?.id?.value shouldBe msg1.id.value
 
-            Assertions.assertNull(base.getById(msg1.id.value))
-        }
+        base.deleteById(msg1.id.value)
 
-        Assertions.assertNotNull(msg2?.id?.value)
-        if (msg2?.id?.value != null && chat2?.id?.value != null) {
-            Assertions.assertEquals(msg2.id.value, base.getById(msg2.id.value)?.id?.value)
+        base.getById(msg1.id.value).shouldBeNull()
 
-            base.deleteById(msg2.id.value)
+        base.getById(msg2.id.value)?.id?.value shouldBe msg2.id.value
 
-            Assertions.assertNull(base.getById(msg2.id.value))
-        }
+        base.deleteById(msg2.id.value)
+
+        base.getById(msg2.id.value).shouldBeNull()
     }
 
     @Test
@@ -132,30 +126,26 @@ class MessageDBTest : DBTestWithKoin() {
         ).id.value
 
         val chat1 = pchats.addNewPersonalChat(alya, vanya)
+        chat1.shouldNotBeNull()
+
         val chat2 = gchats.addNewGroupChat(alya, "Alin chat", "1")
+        chat2.shouldNotBeNull()
 
-        var msg1: MessageDBEntry? = null
-        if (chat1?.id?.value != null)
-            msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
+        val msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
+        msg1.shouldNotBeNull()
 
-        Assertions.assertEquals(1, base.size)
+        base.size shouldBe 1
 
-        var msg2: MessageDBEntry? = null
-        var msg3: MessageDBEntry? = null
-        var msg4: MessageDBEntry? = null
-        if (chat2?.id?.value != null) {
-            msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
+        val msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
 
-            Assertions.assertEquals(2, base.size)
+        base.size shouldBe 2
 
-            msg3 = base.addNewMessage(alya, false, chat2.id.value, "Alya is cool!")
-            msg4 = base.addNewMessage(alya, false, chat2.id.value, "Kotlin top!")
-        }
+        val msg3 = base.addNewMessage(alya, false, chat2.id.value, "Alya is cool!")
+        val msg4 = base.addNewMessage(alya, false, chat2.id.value, "Kotlin top!")
 
-        Assertions.assertEquals(4, base.size)
-
-        Assertions.assertEquals(4, base.findByUser(alya).size)
-        Assertions.assertEquals(0, base.findByUser(vanya).size)
+        base.size shouldBe 4
+        base.findByUser(alya).size shouldBe 4
+        base.findByUser(vanya).size shouldBe 0
 
 //        if (chat1?.id?.value != null) {
 //            Assertions.assertEquals(0, base.findSliceFromChat(true, chat1.id.value, 0, 1).size)

@@ -1,8 +1,11 @@
 import dao.UserDao
 import entries.UserDBEntry
+import io.kotlintest.forOne
+import io.kotlintest.matchers.boolean.shouldBeFalse
+import io.kotlintest.matchers.boolean.shouldBeTrue
+import io.kotlintest.matchers.types.shouldBeNull
+import io.kotlintest.shouldBe
 import io.ktor.auth.UserPasswordCredential
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
 import org.koin.test.inject
 
 class UserDbTest : DBTestWithKoin() {
@@ -28,11 +31,9 @@ class UserDbTest : DBTestWithKoin() {
             "123"
         )
 
-        Assertions.assertEquals(null, base.getUserByCredentials(UserPasswordCredential("kek", "lol")))
-
-        Assertions.assertEquals(alya.id, base.getUserByCredentials(UserPasswordCredential(alya.login, alya.password))?.id)
-        Assertions.assertEquals(alya2.id, base.getUserByCredentials(UserPasswordCredential(alya2.login, alya2.password))?.id)
-
+        base.getUserByCredentials(UserPasswordCredential("kek", "lol")).shouldBeNull()
+        base.getUserByCredentials(UserPasswordCredential(alya.login, alya.password))?.id shouldBe alya.id
+        base.getUserByCredentials(UserPasswordCredential(alya2.login, alya2.password))?.id shouldBe alya2.id
     }
 
     @Test
@@ -56,13 +57,11 @@ class UserDbTest : DBTestWithKoin() {
             "4444"
         )
 
-        Assertions.assertEquals(alya.id, base.getById(alya.id.value)?.id)
-        Assertions.assertEquals(alya.login, base.getById(alya.id.value)?.login)
-
-        Assertions.assertEquals(antoha.id, base.getById(antoha.id.value)?.id)
-        Assertions.assertEquals(antoha.password, base.getById(antoha.id.value)?.password)
-
-        Assertions.assertNull(base.getById(239))
+        base.getById(alya.id.value)?.id shouldBe alya.id
+        base.getById(alya.id.value)?.login shouldBe alya.login
+        base.getById(antoha.id.value)?.id shouldBe antoha.id
+        base.getById(antoha.id.value)?.password shouldBe antoha.password
+        base.getById(239).shouldBeNull()
 
     }
 
@@ -86,16 +85,14 @@ class UserDbTest : DBTestWithKoin() {
             "Bober",
             "123"
         )
-
-        Assertions.assertEquals(alya2.id, base.getUserByCredentials(UserPasswordCredential(alya2.login, alya2.password))?.id)
+        base.getUserByCredentials(UserPasswordCredential(alya2.login, alya2.password))?.id shouldBe alya2.id
 
         base.deleteById(alya2.id.value)
         base.deleteById(239)
 
-        Assertions.assertNull( base.getUserByCredentials(UserPasswordCredential(alya2.login, alya2.password))?.id)
-        Assertions.assertNull( base.getUserByCredentials(UserPasswordCredential("kek", "lol")))
-        Assertions.assertEquals(alya.id, base.getUserByCredentials(UserPasswordCredential(alya.login, alya.password))?.id)
-
+        base.getUserByCredentials(UserPasswordCredential(alya2.login, alya2.password))?.id.shouldBeNull()
+        base.getUserByCredentials(UserPasswordCredential("kek", "lol")).shouldBeNull()
+        base.getUserByCredentials(UserPasswordCredential(alya.login, alya.password))?.id shouldBe alya.id
     }
 
     @Test
@@ -118,17 +115,16 @@ class UserDbTest : DBTestWithKoin() {
             "Nikita",
             "55555"
         )
-
-        Assertions.assertEquals(2, base.size)
+        base.size shouldBe 2
 
         base.deleteById(alya.id.value)
 
-        Assertions.assertEquals(1, base.size)
+        base.size shouldBe 1
 
         base.deleteById(nikita.id.value)
         base.deleteById(239)
 
-        Assertions.assertEquals(0, base.size)
+        base.size shouldBe 0
 
     }
 
@@ -164,11 +160,16 @@ class UserDbTest : DBTestWithKoin() {
         val alyas: List<UserDBEntry> = base.searchByName("Alya")
         val vanyas: List<UserDBEntry> = base.searchByName("Vanya")
 
-        Assertions.assertEquals(2, alyas.size)
-        Assertions.assertTrue(alyas.any{it.id == alya.id})
-        Assertions.assertTrue(alyas.any{it.id == alya2.id})
-        Assertions.assertEquals(1, vanyas.size)
-        Assertions.assertEquals(vanya.id, vanyas[0].id)
+        alyas.size shouldBe 2
+        forOne(alyas) {
+            it.id shouldBe alya.id
+        }
+
+        forOne(alyas) {
+            it.id shouldBe alya2.id
+        }
+        vanyas.size shouldBe 1
+        vanyas[0].id shouldBe vanya.id
 
     }
 
@@ -185,9 +186,8 @@ class UserDbTest : DBTestWithKoin() {
             "123"
         )
 
-        Assertions.assertEquals(alya.id, base.getByEmail("Alya@gmail.com")?.id)
-        Assertions.assertNull( base.getByEmail("kek@gmail.com"))
-
+        base.getByEmail("Alya@gmail.com")?.id shouldBe alya.id
+        base.getByEmail("kek@gmail.com").shouldBeNull()
     }
 
     @Test
@@ -203,9 +203,8 @@ class UserDbTest : DBTestWithKoin() {
             "123"
         )
 
-        Assertions.assertEquals(alya.id, base.getByPhoneNumber("1234567")?.id)
-        Assertions.assertNull(base.getByPhoneNumber("7654321"))
-
+        base.getByPhoneNumber("1234567")?.id shouldBe alya.id
+        base.getByPhoneNumber("7654321").shouldBeNull()
     }
 
     @Test
@@ -230,13 +229,13 @@ class UserDbTest : DBTestWithKoin() {
         )
 
         base.updateName(vanya.id.value, "Sasha")
-        Assertions.assertEquals("Sasha", base.getById(vanya.id.value)?.name)
+        base.getById(vanya.id.value)?.name shouldBe "Sasha"
 
         base.updateName(alya.id.value, "Alya")
         base.updateName(vanya.id.value, "Vanya")
 
-        Assertions.assertEquals("Alya", base.getById(alya.id.value)?.name)
-        Assertions.assertEquals("Vanya", base.getById(vanya.id.value)?.name)
+        base.getById(alya.id.value)?.name shouldBe "Alya"
+        base.getById(vanya.id.value)?.name shouldBe "Vanya"
 
     }
 
@@ -273,10 +272,9 @@ class UserDbTest : DBTestWithKoin() {
         base.updateEmail(alya.id.value, "kek@gmail.com")
         base.updateEmail(vanya.id.value, "Alya@gmail.com")
 
-        Assertions.assertEquals("kek@gmail.com", base.getById(alya.id.value)?.email)
-        Assertions.assertEquals("Alya@gmail.com", base.getById(vanya.id.value)?.email)
-        Assertions.assertEquals("Antoha@gmail.com", base.getById(antoha.id.value)?.email)
-
+        base.getById(alya.id.value)?.email shouldBe "kek@gmail.com"
+        base.getById(vanya.id.value)?.email shouldBe "Alya@gmail.com"
+        base.getById(antoha.id.value)?.email shouldBe "Antoha@gmail.com"
     }
 
     @Test
@@ -300,10 +298,8 @@ class UserDbTest : DBTestWithKoin() {
             "8"
         )
 
-        Assertions.assertTrue(base.existsLogin("Pingwin"))
-        Assertions.assertTrue(base.existsLogin("olivva"))
-        Assertions.assertFalse(base.existsLogin("Bober"))
-
-
+        base.existsLogin("Pingwin").shouldBeTrue()
+        base.existsLogin("olivva").shouldBeTrue()
+        base.existsLogin("Bober").shouldBeFalse()
     }
 }

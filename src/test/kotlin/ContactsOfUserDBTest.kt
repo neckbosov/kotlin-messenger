@@ -1,7 +1,11 @@
 import dao.ContactsOfUserDao
 import dao.UserDao
-import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
+import io.kotlintest.inspectors.forNone
+import io.kotlintest.inspectors.forOne
+import io.kotlintest.matchers.boolean.shouldBeFalse
+import io.kotlintest.matchers.boolean.shouldBeTrue
+import io.kotlintest.matchers.collections.shouldBeEmpty
+import io.kotlintest.shouldBe
 import org.koin.test.inject
 
 class ContactsOfUserDBTest : DBTestWithKoin() {
@@ -34,18 +38,18 @@ class ContactsOfUserDBTest : DBTestWithKoin() {
             "4444"
         ).id.value
 
-        Assertions.assertTrue(base.add(alya, Pair(nikita, "Nikita")))
-        Assertions.assertTrue(base.add(alya, Pair(antoha, "Kartoha")))
-        Assertions.assertTrue(base.add(antoha, Pair(alya, "kek")))
+        base.add(alya, Pair(nikita, "Nikita")).shouldBeTrue()
+        base.add(alya, Pair(antoha, "Kartoha")).shouldBeTrue()
+        base.add(antoha, Pair(alya, "kek")).shouldBeTrue()
 
-        Assertions.assertTrue(base.contains(alya, Pair(nikita, "Nikita")))
-        Assertions.assertTrue(base.contains(alya, Pair(antoha, "Kartoha")))
-        Assertions.assertTrue(base.contains(antoha, Pair(alya, "kek")))
+        base.contains(alya, Pair(nikita, "Nikita")).shouldBeTrue()
+        base.contains(alya, Pair(antoha, "Kartoha")).shouldBeTrue()
+        base.contains(antoha, Pair(alya, "kek")).shouldBeTrue()
 
-        Assertions.assertTrue(base.contains(alya, Pair(nikita, "Bosov")))
-        Assertions.assertTrue(base.contains(alya, Pair(antoha, "KOKOKOKOKOKOKOKOKO")))
+        base.contains(alya, Pair(nikita, "Bosov")).shouldBeTrue()
+        base.contains(alya, Pair(antoha, "KOKOKOKOKOKOKOKOKO")).shouldBeTrue()
 
-        Assertions.assertFalse(base.contains(nikita, Pair(alya, "kek")))
+        base.contains(nikita, Pair(alya, "kek")).shouldBeFalse()
     }
 
     @Test
@@ -77,32 +81,35 @@ class ContactsOfUserDBTest : DBTestWithKoin() {
             "4444"
         ).id.value
 
-        Assertions.assertTrue(base.add(alya, Pair(nikita, "Nikita")))
-        Assertions.assertTrue(base.add(alya, Pair(antoha, "Kartoha")))
-        Assertions.assertTrue(base.add(antoha, Pair(alya, "kek")))
+        base.add(alya, Pair(nikita, "Nikita")).shouldBeTrue()
+        base.add(alya, Pair(antoha, "Kartoha")).shouldBeTrue()
+        base.add(antoha, Pair(alya, "kek")).shouldBeTrue()
 
-        Assertions.assertEquals(2, base.select(alya).size)
-        Assertions.assertTrue(base.select(alya).any{it.first == antoha})
-        Assertions.assertTrue(base.select(alya).any{it.first == nikita})
+        base.select(alya).size shouldBe 2
+        base.select(alya).forOne {
+            it.first shouldBe antoha
+        }
+        base.select(alya).forOne {
+            it.first shouldBe nikita
+        }
+        base.select(antoha).size shouldBe 1
+        base.select(antoha).forOne {
+            it.first shouldBe alya
+        }
+        base.select(nikita).shouldBeEmpty()
 
-        Assertions.assertEquals(1, base.select(antoha).size)
-        Assertions.assertTrue(base.select(antoha).any{it.first == alya})
 
-        Assertions.assertEquals(0, base.select(nikita).size)
+        base.contains(alya, Pair(nikita, "Nikita")).shouldBeTrue()
+        base.contains(alya, Pair(antoha, "Kartoha")).shouldBeTrue()
+        base.remove(alya, Pair(nikita, "Nikita")).shouldBeTrue()
+        base.remove(alya, Pair(antoha, "KOKOKOKOKOKOKOKOKO")).shouldBeTrue()
 
+        base.contains(alya, Pair(nikita, "Nikita")).shouldBeFalse()
+        base.contains(alya, Pair(antoha, "Kartoha")).shouldBeFalse()
 
-        Assertions.assertTrue(base.contains(alya, Pair(nikita, "Nikita")))
-        Assertions.assertTrue(base.contains(alya, Pair(antoha, "Kartoha")))
-
-        Assertions.assertTrue(base.remove(alya, Pair(nikita, "Nikita")))
-        Assertions.assertTrue(base.remove(alya, Pair(antoha, "KOKOKOKOKOKOKOKOKO")))
-
-        Assertions.assertFalse(base.contains(alya, Pair(nikita, "Nikita")))
-        Assertions.assertFalse(base.contains(alya, Pair(antoha, "Kartoha")))
-
-        Assertions.assertEquals(0, base.select(alya).size)
-        Assertions.assertEquals(1, base.select(antoha).size)
-        Assertions.assertEquals(0, base.select(nikita).size)
+        base.select(alya).shouldBeEmpty()
+        base.select(antoha).size shouldBe 1
+        base.select(nikita).shouldBeEmpty()
     }
 
     @Test
@@ -134,16 +141,24 @@ class ContactsOfUserDBTest : DBTestWithKoin() {
             "4444"
         ).id.value
 
-        Assertions.assertTrue(base.add(alya, Pair(nikita, "Nikita")))
-        Assertions.assertTrue(base.add(alya, Pair(antoha, "Kartoha")))
-        Assertions.assertTrue(base.add(antoha, Pair(alya, "kek")))
+        base.add(alya, Pair(nikita, "Nikita")).shouldBeTrue()
+        base.add(alya, Pair(antoha, "Kartoha")).shouldBeTrue()
+        base.add(antoha, Pair(alya, "kek")).shouldBeTrue()
 
         base.changeName(alya, antoha, "Antoha")
         base.changeName(antoha, alya, "Alya")
 
-        Assertions.assertTrue(base.select(alya).any({it.second == "Antoha"}))
-        Assertions.assertFalse(base.select(alya).any({it.second == "Kartoha"}))
-        Assertions.assertTrue(base.select(antoha).any({it.second == "Alya"}))
-        Assertions.assertFalse(base.select(antoha).any({it.second == "kek"}))
+        base.select(alya).forOne {
+            it.second shouldBe "Antoha"
+        }
+        base.select(alya).forNone {
+            it.second shouldBe "Kartoha"
+        }
+        base.select(antoha).forOne {
+            it.second shouldBe "Alya"
+        }
+        base.select(antoha).forNone {
+            it.second shouldBe "kek"
+        }
     }
 }
