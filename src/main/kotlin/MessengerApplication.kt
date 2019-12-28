@@ -16,8 +16,11 @@ import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.post
 import io.ktor.routing.routing
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
+import tables.*
 
 data class LoginRequest(val username: String, val password: String)
 data class RegisterRequest(
@@ -52,10 +55,10 @@ fun main() {
 }
 
 fun Application.main() {
-    MessengerApplication().apply { main() }
+    MessengerApplication(DatabaseFactory::init).apply { main() }
 }
 
-class MessengerApplication {
+class MessengerApplication(val initDB: () -> Unit) {
     fun Application.main() {
         install(Koin) {
             modules(listOf(daoModule, apiModule))
@@ -78,6 +81,20 @@ class MessengerApplication {
             exception<Throwable> {
                 call.respond(HttpStatusCode.InternalServerError, "Internal server error")
             }
+        }
+
+        initDB()
+
+        transaction {
+            SchemaUtils.create(
+                BlockedUsers,
+                Contacts,
+                GroupChatsToUsers,
+                GroupChats,
+                Messages,
+                PersonalChats,
+                Users
+            )
         }
 
         val server: Server by inject()

@@ -9,9 +9,9 @@ import io.kotlintest.matchers.types.shouldNotBeNull
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class MessageDBTest : DBTestWithKoin() {
+class MessageDBTest : DBTest() {
     @Test
-    fun getByIdTest() {
+    fun getByIdTest() = withApp {
         val base: MessageDao by inject()
         val pchats: PersonalChatDao by inject()
         val gchats: GroupChatDao by inject()
@@ -55,7 +55,7 @@ class MessageDBTest : DBTestWithKoin() {
     }
 
     @Test
-    fun deleteByIdTest() {
+    fun deleteByIdTest() = withApp {
         val base: MessageDao by inject()
         val pchats: PersonalChatDao by inject()
         val gchats: GroupChatDao by inject()
@@ -103,7 +103,7 @@ class MessageDBTest : DBTestWithKoin() {
     }
 
     @Test
-    fun findByUserAndfindSliceFromChatAndSizeTest() {
+    fun findByUserAndfindSliceFromChatAndSizeTest() = withApp {
         val base: MessageDao by inject()
         val pchats: PersonalChatDao by inject()
         val gchats: GroupChatDao by inject()

@@ -5,9 +5,9 @@ import io.kotlintest.matchers.boolean.shouldBeTrue
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class BlockedUsersDBTest : DBTestWithKoin() {
+class BlockedUsersDBTest : DBTest() {
     @Test
-    fun allTest() {
+    fun allTest() = withApp {
         val base: BlockedUsersDao by inject()
         val users: UserDao by inject()
 

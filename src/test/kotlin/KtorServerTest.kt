@@ -13,7 +13,7 @@ import java.util.*
 
 class KtorServerTest : DBTest() {
     private fun withAppAndServer(test: TestApplicationEngine.(Server) -> Unit) {
-        withTestApplication(Application::main) {
+        withTestApplication(Application::test) {
             val server: Server by inject()
             test(server)
         }

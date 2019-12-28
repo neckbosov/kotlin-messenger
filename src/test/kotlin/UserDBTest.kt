@@ -8,10 +8,10 @@ import io.kotlintest.shouldBe
 import io.ktor.auth.UserPasswordCredential
 import org.koin.test.inject
 
-class UserDbTest : DBTestWithKoin() {
+class UserDbTest : DBTest() {
 
     @Test
-    fun getUserByCredentialsTest() {
+    fun getUserByCredentialsTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -37,7 +37,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun getByIdTest() {
+    fun getByIdTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -66,7 +66,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun deleteByIdTest() {
+    fun deleteByIdTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -96,7 +96,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun sizeTest() {
+    fun sizeTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -129,7 +129,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun searchByNameTest() {
+    fun searchByNameTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -174,7 +174,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun getByEmailTest() {
+    fun getByEmailTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -191,7 +191,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun getByPhoneNumberTest() {
+    fun getByPhoneNumberTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -208,7 +208,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun updateNameTest() {
+    fun updateNameTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -240,7 +240,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun updateEmailTest() {
+    fun updateEmailTest() = withApp {
 
         val base: UserDao by inject()
 
@@ -278,7 +278,7 @@ class UserDbTest : DBTestWithKoin() {
     }
 
     @Test
-    fun existsLoginTest() {
+    fun existsLoginTest() = withApp {
 
         val base: UserDao by inject()
 

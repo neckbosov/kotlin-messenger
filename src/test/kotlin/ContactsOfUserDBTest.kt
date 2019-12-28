@@ -8,9 +8,9 @@ import io.kotlintest.matchers.collections.shouldBeEmpty
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class ContactsOfUserDBTest : DBTestWithKoin() {
+class ContactsOfUserDBTest : DBTest() {
     @Test
-    fun addAndContainsTest() {
+    fun addAndContainsTest() = withApp {
         val base: ContactsOfUserDao by inject()
         val users: UserDao by inject()
 
@@ -53,7 +53,7 @@ class ContactsOfUserDBTest : DBTestWithKoin() {
     }
 
     @Test
-    fun removeAndSelectTest() {
+    fun removeAndSelectTest() = withApp {
         val base: ContactsOfUserDao by inject()
         val users: UserDao by inject()
 
@@ -113,7 +113,7 @@ class ContactsOfUserDBTest : DBTestWithKoin() {
     }
 
     @Test
-    fun changeNameTest() {
+    fun changeNameTest() = withApp {
         val base: ContactsOfUserDao by inject()
         val users: UserDao by inject()
 

@@ -5,9 +5,9 @@ import io.kotlintest.matchers.types.shouldNotBeNull
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class PersonalChatTests : DBTestWithKoin() {
+class PersonalChatTests : DBTest() {
     @Test
-    fun addNewPersonalChatTest() {
+    fun addNewPersonalChatTest() = withApp {
         val chats: PersonalChatDao by inject()
         val users: UserDao by inject()
 
@@ -37,7 +37,7 @@ class PersonalChatTests : DBTestWithKoin() {
     }
 
     @Test
-    fun getByIdTest() {
+    fun getByIdTest() = withApp {
         val chats: PersonalChatDao by inject()
         val users: UserDao by inject()
 
@@ -66,7 +66,7 @@ class PersonalChatTests : DBTestWithKoin() {
     }
 
     @Test
-    fun deleteByIdTest() {
+    fun deleteByIdTest() = withApp {
         val chats: PersonalChatDao by inject()
         val users: UserDao by inject()
 
@@ -97,7 +97,7 @@ class PersonalChatTests : DBTestWithKoin() {
     }
 
     @Test
-    fun sizeTest() {
+    fun sizeTest() = withApp {
         val chats: PersonalChatDao by inject()
         val users: UserDao by inject()
 
