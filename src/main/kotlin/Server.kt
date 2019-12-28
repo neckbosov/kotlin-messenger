@@ -38,12 +38,12 @@ class Server : KoinComponent {
 
 //    fun isUserMemberOfChat(id: UserId, chatId: )
 
-    fun getChats(userId: UserId): List<GroupChatId> = getPersonalChats(userId).plus(getGroupChats(userId))
+    suspend fun getChats(userId: UserId): List<GroupChatId> = getPersonalChats(userId).plus(getGroupChats(userId))
     fun getPersonalChats(userId: UserId) = personalChatBase.selectWithUser(userId)
 
-    fun getGroupChats(userId: UserId) = groupChatsOfUserBase.select(userId)
+    suspend fun getGroupChats(userId: UserId) = groupChatsOfUserBase.select(userId)
 
-    fun getContacts(userId: UserId) = contactsOfUserBase.select(userId)
+    suspend fun getContacts(userId: UserId) = contactsOfUserBase.select(userId)
 
     fun getChatMessages(chatId: Id, isPersonal: Boolean): List<Message> =
         messageBase.getMessagesFromChat(isPersonal, chatId).map { it.toMessage() }

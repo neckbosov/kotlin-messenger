@@ -43,6 +43,7 @@ dependencies {
     // Test
     testImplementation("io.kotlintest:kotlintest-runner-junit5:$vKotlintest")
     testImplementation("org.testcontainers:junit-jupiter:$vTestcontainers")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$vKotlinx")
 
     // Koin
     implementation("org.koin:koin-ktor:$vKoin")
@@ -72,6 +73,7 @@ dependencies {
 
     // Database
     implementation("org.postgresql:postgresql:$vPostgres")
+    implementation("com.zaxxer:HikariCP:3.4.1")
     testImplementation("org.testcontainers:postgresql:$vTestcontainers")
 }
 

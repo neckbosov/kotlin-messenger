@@ -7,15 +7,15 @@ import entries.GroupChatDBEntry
 import entries.GroupChatToUserDBEntry
 import entries.UserDBEntry
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.transaction
+import tables.DatabaseFactory.dbQuery
 import tables.GroupChatsToUsers
 import tables.getEntityID
 
 class GroupChatOfUserDB : GroupChatsOfUserDao {
-    override fun add(key: UserId, value: GroupChatId): Boolean =
-        transaction {
-            val user = getEntityID<UserDBEntry>(key) ?: return@transaction false
-            val chat = getEntityID<GroupChatDBEntry>(value) ?: return@transaction false
+    override suspend fun add(key: UserId, value: GroupChatId): Boolean =
+        dbQuery {
+            val user = getEntityID<UserDBEntry>(key) ?: return@dbQuery false
+            val chat = getEntityID<GroupChatDBEntry>(value) ?: return@dbQuery false
             GroupChatToUserDBEntry.new {
                 this.chatId = chat
                 this.userId = user
@@ -23,13 +23,13 @@ class GroupChatOfUserDB : GroupChatsOfUserDao {
             true
         }
 
-    override fun remove(key: UserId, value: GroupChatId) =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction false
-            val valueId = getEntityID<GroupChatDBEntry>(value) ?: return@transaction false
+    override suspend fun remove(key: UserId, value: GroupChatId) =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery false
+            val valueId = getEntityID<GroupChatDBEntry>(value) ?: return@dbQuery false
 
             if (keyId.value == GroupChatDBEntry.findById(valueId.value)?.owner?.value) {
-                return@transaction false
+                return@dbQuery false
             }
 
             GroupChatToUserDBEntry
@@ -37,16 +37,16 @@ class GroupChatOfUserDB : GroupChatsOfUserDao {
                 .singleOrNull()?.delete() != null
         }
 
-    override fun select(key: UserId): List<GroupChatId> =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction emptyList<GroupChatId>()
+    override suspend fun select(key: UserId): List<GroupChatId> =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery emptyList<GroupChatId>()
             GroupChatToUserDBEntry.find { GroupChatsToUsers.userId eq keyId }.map { it.chatId.value }
         }
 
-    override fun contains(key: UserId, value: GroupChatId): Boolean =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction false
-            val valueId = getEntityID<GroupChatDBEntry>(value) ?: return@transaction false
+    override suspend fun contains(key: UserId, value: GroupChatId): Boolean =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery false
+            val valueId = getEntityID<GroupChatDBEntry>(value) ?: return@dbQuery false
             !GroupChatToUserDBEntry
                 .find { (GroupChatsToUsers.userId eq keyId) and (GroupChatsToUsers.chatId eq valueId) }
                 .empty()

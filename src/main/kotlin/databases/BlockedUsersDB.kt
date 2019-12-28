@@ -7,15 +7,15 @@ import entries.UserDBEntry
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import tables.BlockedUsers
+import tables.DatabaseFactory.dbQuery
 import tables.getEntityID
 
 class BlockedUsersDB : BlockedUsersDao {
-    override fun add(key: UserId, value: UserId): Boolean =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction false
-            val valueId = getEntityID<UserDBEntry>(value) ?: return@transaction false
+    override suspend fun add(key: UserId, value: UserId): Boolean =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery false
+            val valueId = getEntityID<UserDBEntry>(value) ?: return@dbQuery false
             BlockingOfUserDBEntry.new {
                 user = keyId
                 blockedUser = valueId
@@ -23,24 +23,24 @@ class BlockedUsersDB : BlockedUsersDao {
             true
         }
 
-    override fun remove(key: UserId, value: UserId) =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction false
-            val valueId = getEntityID<UserDBEntry>(value) ?: return@transaction false
+    override suspend fun remove(key: UserId, value: UserId) =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery false
+            val valueId = getEntityID<UserDBEntry>(value) ?: return@dbQuery false
             val expr = (BlockedUsers.user eq keyId) and (BlockedUsers.blockedUser eq valueId)
             BlockingOfUserDBEntry.find { expr }.singleOrNull()?.delete() != null
         }
 
-    override fun select(key: UserId) =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction emptyList<UserId>()
+    override suspend fun select(key: UserId) =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery emptyList<UserId>()
             BlockedUsers.select { BlockedUsers.user eq keyId }.map { it[BlockedUsers.blockedUser].value }
         }
 
-    override fun contains(key: UserId, value: UserId): Boolean =
-        transaction {
-            val keyId = getEntityID<UserDBEntry>(key) ?: return@transaction false
-            val valueId = getEntityID<UserDBEntry>(value) ?: return@transaction false
+    override suspend fun contains(key: UserId, value: UserId): Boolean =
+        dbQuery {
+            val keyId = getEntityID<UserDBEntry>(key) ?: return@dbQuery false
+            val valueId = getEntityID<UserDBEntry>(value) ?: return@dbQuery false
             !BlockedUsers.select {
                 (BlockedUsers.user eq keyId) and (BlockedUsers.blockedUser eq valueId)
             }.empty()

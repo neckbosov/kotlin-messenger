@@ -1,8 +1,8 @@
 package dao
 
 interface RelationsDao<X, Y> {
-    fun add(key: X, value: Y): Boolean
-    fun remove(key: X, value: Y): Boolean
-    fun select(key: X): List<Y>
-    fun contains(key : X, value : Y) : Boolean
+    suspend fun add(key: X, value: Y): Boolean
+    suspend fun remove(key: X, value: Y): Boolean
+    suspend fun select(key: X): List<Y>
+    suspend fun contains(key: X, value: Y): Boolean
 }
