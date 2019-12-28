@@ -6,6 +6,9 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import tables.*
 
+internal class SpecifiedPostgreSQLContainer(image: String) :
+    PostgreSQLContainer<SpecifiedPostgreSQLContainer>(image)
+
 @Testcontainers
 object TestDb {
     @Container

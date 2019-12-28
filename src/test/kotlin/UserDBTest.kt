@@ -8,7 +8,7 @@ import io.kotlintest.shouldBe
 import io.ktor.auth.UserPasswordCredential
 import org.koin.test.inject
 
-class UserDbTest : DBTest() {
+class UserDbTest : ServerTest() {
 
     @Test
     fun getUserByCredentialsTest() = withApp {

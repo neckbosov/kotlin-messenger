@@ -5,7 +5,7 @@ import io.kotlintest.matchers.types.shouldNotBeNull
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class PersonalChatTests : DBTest() {
+class PersonalChatTests : ServerTest() {
     @Test
     fun addNewPersonalChatTest() = withApp {
         val chats: PersonalChatDao by inject()

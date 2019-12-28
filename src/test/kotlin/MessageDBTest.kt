@@ -9,7 +9,7 @@ import io.kotlintest.matchers.types.shouldNotBeNull
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class MessageDBTest : DBTest() {
+class MessageDBTest : ServerTest() {
     @Test
     fun getByIdTest() = withApp {
         val base: MessageDao by inject()

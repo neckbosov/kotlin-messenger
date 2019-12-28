@@ -7,7 +7,7 @@ import io.kotlintest.matchers.types.shouldNotBeNull
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class MembersOfGroupChatDBTest : DBTest() {
+class MembersOfGroupChatDBTest : ServerTest() {
     @Test
     fun addTest() = withApp {
         val base: MembersOfGroupChatDao by inject()

@@ -8,7 +8,7 @@ import io.kotlintest.matchers.collections.shouldBeEmpty
 import io.kotlintest.shouldBe
 import org.koin.test.inject
 
-class ContactsOfUserDBTest : DBTest() {
+class ContactsOfUserDBTest : ServerTest() {
     @Test
     fun addAndContainsTest() = withApp {
         val base: ContactsOfUserDao by inject()

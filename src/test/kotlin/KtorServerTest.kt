@@ -11,7 +11,7 @@ import io.ktor.server.testing.*
 import org.koin.test.inject
 import java.util.*
 
-class KtorServerTest : DBTest() {
+class KtorServerTest : ServerTest() {
     private fun withAppAndServer(test: TestApplicationEngine.(Server) -> Unit) {
         withTestApplication(Application::test) {
             val server: Server by inject()
