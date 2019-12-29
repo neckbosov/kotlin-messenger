@@ -1,7 +1,0 @@
-object TestDb {
-
-
-    fun init() {
-
-    }
-}
