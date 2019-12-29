@@ -8,14 +8,17 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.*
+import kotlinx.coroutines.runBlocking
 import org.koin.test.inject
 import java.util.*
 
 class KtorServerTest : ServerTest() {
-    private fun withAppAndServer(test: TestApplicationEngine.(Server) -> Unit) {
-        withTestApplication(Application::test) {
-            val server: Server by inject()
-            test(server)
+    private fun withAppAndServer(test: suspend TestApplicationEngine.(Server) -> Unit) {
+        withTestApplication(Application::main) {
+            runBlocking {
+                val server: Server by inject()
+                test(server)
+            }
         }
     }
 

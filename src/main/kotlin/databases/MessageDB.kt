@@ -9,20 +9,20 @@ import entries.PersonalChatDBEnrty
 import entries.UserDBEntry
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import tables.DatabaseFactory.dbQuery
 import tables.Messages
 
 class MessageDB : MessageDao {
-    override fun addNewMessage(from: UserId, isPersonal: Boolean, chat: Id, text: String) =
-        transaction {
-            val fromId = UserDBEntry.findById(from)?.id ?: return@transaction null
+    override suspend fun addNewMessage(from: UserId, isPersonal: Boolean, chat: Id, text: String) =
+        dbQuery {
+            val fromId = UserDBEntry.findById(from)?.id ?: return@dbQuery null
             val chatId: Id
 
             if (isPersonal)
-                chatId = PersonalChatDBEnrty.findById(chat)?.id?.value ?: return@transaction null
+                chatId = PersonalChatDBEnrty.findById(chat)?.id?.value ?: return@dbQuery null
             else
-                chatId = GroupChatDBEntry.findById(chat)?.id?.value ?: return@transaction null
+                chatId = GroupChatDBEntry.findById(chat)?.id?.value ?: return@dbQuery null
 
             MessageDBEntry.new {
                 this.from = fromId
@@ -35,16 +35,16 @@ class MessageDB : MessageDao {
             }
         }
 
-    override fun getById(elemId: Id) = transaction { MessageDBEntry.findById(elemId) }
+    override suspend fun getById(elemId: Id) = dbQuery { MessageDBEntry.findById(elemId) }
 
-    override fun deleteById(elemId: Id) =
-        transaction { MessageDBEntry.findById(elemId)?.delete() ?: Unit }
+    override suspend fun deleteById(elemId: Id) =
+        dbQuery { MessageDBEntry.findById(elemId)?.delete() ?: Unit }
 
-    override fun findByUser(user: UserId) =
-        transaction { MessageDBEntry.find { Messages.from eq user }.toList() }
+    override suspend fun findByUser(user: UserId) =
+        dbQuery { MessageDBEntry.find { Messages.from eq user }.toList() }
 
-//    override fun findSliceFromChat(isPersonal: Boolean, chat: Id, block: Int, last: Int?) =
-//        transaction {
+//    override suspend fun findSliceFromChat(isPersonal: Boolean, chat: Id, block: Int, last: Int?) =
+//        dbQuery {
 //            val chatMessages =
 //                MessageDBEntry
 //                    .find { (Messages.isPersonal eq isPersonal) and (Messages.chat eq chat) }
@@ -53,13 +53,12 @@ class MessageDB : MessageDao {
 //            chatMessages.limit(block, offset).toList().reversed()
 //        }
 
-    override fun getMessagesFromChat(isPersonal: Boolean, chat: Id): List<MessageDBEntry> =
-        transaction {
+    override suspend fun getMessagesFromChat(isPersonal: Boolean, chat: Id): List<MessageDBEntry> =
+        dbQuery {
             MessageDBEntry
                 .find { (Messages.isPersonal eq isPersonal) and (Messages.chat eq chat) }
                 .orderBy(Messages.dateTime to SortOrder.ASC).toList()
         }
 
-    override val size
-        get() = transaction { MessageDBEntry.all().count() }
+    override suspend fun size() = dbQuery { MessageDBEntry.all().count() }
 }

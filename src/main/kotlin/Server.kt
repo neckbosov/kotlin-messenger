@@ -15,7 +15,7 @@ class Server : KoinComponent {
     val membersOfGroupChatBase: MembersOfGroupChatDao by inject()
     val contactsOfUserBase: ContactsOfUserDao by inject()
 
-    fun register(name: String, email: String, phoneNumber: String, login: String, password: String): User {
+    suspend fun register(name: String, email: String, phoneNumber: String, login: String, password: String): User {
         return when {
             email.count { it == '@' } != 1 -> throw InvalidRequestException("Email must contain exactly one '@'")
             !phoneNumber.all {
@@ -31,29 +31,29 @@ class Server : KoinComponent {
         }
     }
 
-    fun getUserByCredentials(credentials: UserPasswordCredential): User? =
+    suspend fun getUserByCredentials(credentials: UserPasswordCredential): User? =
         userBase.getUserByCredentials(credentials)?.toUser()
 
-    fun getUserById(id: UserId): User? = userBase.getById(id)?.toUser()
+    suspend fun getUserById(id: UserId): User? = userBase.getById(id)?.toUser()
 
 //    fun isUserMemberOfChat(id: UserId, chatId: )
 
     suspend fun getChats(userId: UserId): List<GroupChatId> = getPersonalChats(userId).plus(getGroupChats(userId))
-    fun getPersonalChats(userId: UserId) = personalChatBase.selectWithUser(userId)
+    suspend fun getPersonalChats(userId: UserId) = personalChatBase.selectWithUser(userId)
 
     suspend fun getGroupChats(userId: UserId) = groupChatsOfUserBase.select(userId)
 
     suspend fun getContacts(userId: UserId) = contactsOfUserBase.select(userId)
 
-    fun getChatMessages(chatId: Id, isPersonal: Boolean): List<Message> =
+    suspend fun getChatMessages(chatId: Id, isPersonal: Boolean): List<Message> =
         messageBase.getMessagesFromChat(isPersonal, chatId).map { it.toMessage() }
 
-    fun sendMessage(from: UserId, isPersonal: Boolean, chatId: Id, text: String) =
+    suspend fun sendMessage(from: UserId, isPersonal: Boolean, chatId: Id, text: String) =
         messageBase.addNewMessage(from, isPersonal, chatId, text)?.toMessage()
 
-    fun createGroupChat(userId: UserId, name: String, uniqueLink: String?) =
+    suspend fun createGroupChat(userId: UserId, name: String, uniqueLink: String?) =
         groupChatBase.addNewGroupChat(userId, name, uniqueLink)?.toGroupChat()
 
-    fun createPersonalChat(user1: UserId, user2: UserId) =
+    suspend fun createPersonalChat(user1: UserId, user2: UserId) =
         personalChatBase.addNewPersonalChat(user1, user2)?.toPersonalChat()
 }

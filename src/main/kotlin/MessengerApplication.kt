@@ -16,11 +16,8 @@ import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.post
 import io.ktor.routing.routing
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.Koin
 import org.koin.ktor.ext.inject
-import tables.*
 
 data class LoginRequest(val username: String, val password: String)
 data class RegisterRequest(
@@ -55,10 +52,10 @@ fun main() {
 }
 
 fun Application.main() {
-    MessengerApplication(DatabaseFactory::init).apply { main() }
+    MessengerApplication().apply { main() }
 }
 
-class MessengerApplication(val initDB: () -> Unit) {
+class MessengerApplication {
     fun Application.main() {
         install(Koin) {
             modules(listOf(daoModule, apiModule))
@@ -83,19 +80,7 @@ class MessengerApplication(val initDB: () -> Unit) {
             }
         }
 
-        initDB()
 
-        transaction {
-            SchemaUtils.create(
-                BlockedUsers,
-                Contacts,
-                GroupChatsToUsers,
-                GroupChats,
-                Messages,
-                PersonalChats,
-                Users
-            )
-        }
 
         val server: Server by inject()
         install(Authentication) {
@@ -128,7 +113,7 @@ class MessengerApplication(val initDB: () -> Unit) {
             }
             authenticate {
                 //TODO(Test those 4 methods:)
-                val getByIdRequestsMap: Map<String, (Server, UserId) -> List<Any>> = mapOf(
+                val getByIdRequestsMap: Map<String, suspend (Server, UserId) -> List<Any>> = mapOf(
                     "/getChats" to Server::getChats,
                     "/getPersonalChats" to Server::getPersonalChats,
                     "/getGroupChats" to Server::getGroupChats,

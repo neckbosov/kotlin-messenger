@@ -115,16 +115,16 @@ class UserDbTest : ServerTest() {
             "Nikita",
             "55555"
         )
-        base.size shouldBe 2
+        base.size() shouldBe 2
 
         base.deleteById(alya.id.value)
 
-        base.size shouldBe 1
+        base.size() shouldBe 1
 
         base.deleteById(nikita.id.value)
         base.deleteById(239)
 
-        base.size shouldBe 0
+        base.size() shouldBe 0
 
     }
 

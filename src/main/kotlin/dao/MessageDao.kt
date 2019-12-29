@@ -5,8 +5,8 @@ import entries.MessageDBEntry
 typealias MessageId = Long
 
 interface MessageDao : ObjectDao<MessageDBEntry> {
-    fun addNewMessage(from: UserId, isPersonal: Boolean, chat: Id, text: String): MessageDBEntry?
-    fun findByUser(user: UserId): List<MessageDBEntry>
+    suspend fun addNewMessage(from: UserId, isPersonal: Boolean, chat: Id, text: String): MessageDBEntry?
+    suspend fun findByUser(user: UserId): List<MessageDBEntry>
     //    fun findSliceFromChat(type: Boolean, chat: Id, block: Int, last: Int? = null): List<MessageDBEntry>
-    fun getMessagesFromChat(isPersonal: Boolean, chat: Id): List<MessageDBEntry>
+    suspend fun getMessagesFromChat(isPersonal: Boolean, chat: Id): List<MessageDBEntry>
 }

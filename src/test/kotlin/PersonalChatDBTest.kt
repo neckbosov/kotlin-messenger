@@ -132,18 +132,18 @@ class PersonalChatTests : ServerTest() {
         chat1.shouldNotBeNull()
         chat2.shouldNotBeNull()
         chat3.shouldNotBeNull()
-        chats.size shouldBe 3
+        chats.size() shouldBe 3
 
         chats.deleteById(chat1)
 
-        chats.size shouldBe 2
+        chats.size() shouldBe 2
 
         chats.deleteById(chat2)
 
-        chats.size shouldBe 1
+        chats.size() shouldBe 1
 
         chats.deleteById(chat3)
 
-        chats.size shouldBe 0
+        chats.size() shouldBe 0
     }
 }

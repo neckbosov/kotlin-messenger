@@ -134,16 +134,16 @@ class MessageDBTest : ServerTest() {
         val msg1 = base.addNewMessage(alya, true, chat1.id.value, "Priv")
         msg1.shouldNotBeNull()
 
-        base.size shouldBe 1
+        base.size() shouldBe 1
 
         val msg2 = base.addNewMessage(alya, false, chat2.id.value, "Vsem privet!")
 
-        base.size shouldBe 2
+        base.size() shouldBe 2
 
         val msg3 = base.addNewMessage(alya, false, chat2.id.value, "Alya is cool!")
         val msg4 = base.addNewMessage(alya, false, chat2.id.value, "Kotlin top!")
 
-        base.size shouldBe 4
+        base.size() shouldBe 4
         base.findByUser(alya).size shouldBe 4
         base.findByUser(vanya).size shouldBe 0
 
